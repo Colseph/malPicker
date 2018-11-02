@@ -1,8 +1,10 @@
 #~File:malPicker.py
 #~picks random show in chosen mal list can be filtered by type number of episodes
 
+#~TODO get anime from more than just the first page(for users with more than 300 anime in theyre list)
+
 #~~~~~~~~~~Config~~~~~~~~~~#
-logPath = '.\\' #~location to save log file (use double \\ because its the escape character
+logPath = './' #~location to save log file (use double \\ because its the escape character
 logNameInfo = 'malPicker' #~name for info log file (you dont need ext just name)
 #~~~~~~~~End-Config~~~~~~~~#
 
@@ -43,91 +45,17 @@ html = response.content
 soup = BeautifulSoup(html, 'html.parser')
 
 #~graps the nicely premade dictionary already in the html(thanks MAL)
-#null = "null"#~stops null no value error..
-#true = "true"#~stops true no value error... shouldnt cause problems cuase not True keyword(case sensitive)
-#false = "false"#~stops false no value error.. shouldnt cause problems bacuase not False keyword(case sensitive)
+#~could replace all instances of null,true,false with quoted versions but this was easier? idk
+null = "null"#~stops null no value error..
+true = "true"#~stops true no value error... shouldnt cause problems cuase not True keyword(case sensitive)
+false = "false"#~stops false no value error.. shouldnt cause problems bacuase not False keyword(case sensitive)
 listTable = soup.find('table', attrs={'class': 'list-table'})
 
 #~converts string to list. if i did listComplete = list(listTable.get('data-items')) then it would treat each character as a diff list item..
 listCompleteString = listTable.get('data-items')#~retrieves string from html
 
-#~converts string to list (VERY messy) because for some reason python treats it as a 1 item string instead of the list it is..
-logging.info('creating list from html')
-listComplete = []
-entry1 = ''
-entry2 = ''
-listEntry = {}
-whichEntry = 'entry1'
-for char in listCompleteString:
-    if char == '[':
-        #~do nothing(leave the bracket out of the list)
-        logging.info("skipping bracket: [")
-        charOld = char
-        continue
-    elif char == ']':
-        #~do nothing(leave brackets out of list
-        logging.info("skipping bracket: ]")
-        charOld = char
-        continue
-    elif char == '{':
-        #~do nothint skips {
-        logging.info("skipping bracket:{")
-        charOld = char
-        continue
-    elif char == '}':
-        #~adds entry to the list and resets listEntry, sets charOld as } to skip comma
-        if charOld == '"':#~last entry in dict dont have comma, so this makes sure theyre not merged into next dict
-            logging.info("adding last entry to dictionary")
-            listEntry[entry1] = entry2
-            logging.debug("'" + str(entry1) + "'" + ":" + "'" + str(entry2) + "'")
-            entry1 = ''
-            entry2 = ''
-            whichEntry = 'entry1'
-        logging.info("adding dictionary to list")
-        listComplete.append(listEntry)
-        logging.debug(listEntry)
-        listEntry = {}
-        charOld = char
-        continue
-    elif char == ',':
-        if charOld == '}':
-            logging.info("skipping comma: ,")
-            #~skips comma
-            charOld = char
-            continue
-        else:
-            #~adds new dictionary entry
-            logging.info("adding new entry to dictionary")
-            listEntry[entry1] = entry2
-            logging.debug("'" + str(entry1) + "'" + ":" + "'" + str(entry2) + "'")
-            entry1 = ''
-            entry2 = ''
-            whichEntry = 'entry1'
-            charOld = char
-            continue
-    elif char == ':':
-        whichEntry = 'entry2'
-        charOld = char
-        continue
-    elif char == '"':
-        #~skipps double quoees- theyre replaced with single when added to dictionary
-        logging.info('skipped double quotes: "')
-        charOld = char
-        continue
-    else:
-        if whichEntry == 'entry1':
-            entry1 += char
-            charOld = char
-        else:
-            entry2 += char
-            charOld = char
-logging.info('finished parsing html into list')
+listComplete = eval(listCompleteString)
 logging.info('Total Entries: ' + str(len(listComplete[0]) * len(listComplete)) + ' - ' + str(len(listComplete[0])) + ' Entries in ' + str(len(listComplete)) + ' Dictionaries')
-
-#print(len(listComplete))
-#itemFind = len(listComplete)
-#for item in range(itemFind):
-#    print(listComplete[item]['anime_title'])
 
 #~picks a random anime in the list
 randomAnime = randint(0,(len(listComplete) - 1))
