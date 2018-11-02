@@ -24,4 +24,5 @@ Couldnt decide what to watch next, so i made this
    - install python then install modules w/ pip
 2. edit config in malPicker.py(optional)
    - set where you want your log file to be output
+   - right now its set to `'./'`
 3. run malPicker.py, follow instructions.
